@@ -40,14 +40,14 @@ sudo chmod a+w /etc/nomad.d
 # Nomad config file copy
 sudo mkdir -p /tmp/nomad
 sudo tee /tmp/nomad/server.hcl <<EOF
-data_dir = "/tmp/nomad/server"
+data_dir = "/opt/nomad/server"
 
 server {
   enabled          = true
   bootstrap_expect = 3
   job_gc_threshold = "2m"
   server_join {
-    retry_join = ["10.0.0.100", "10.0.1.100", "10.0.2.100"]
+    retry_join = ["provider=aws tag_key=nomad_server tag_value=true region=us-west-2"]
     retry_max = 10
     retry_interval = "15s"
   }
@@ -71,21 +71,11 @@ plugin "raw_exec" {
 client {
   enabled           = true
   network_interface = "eth0"
-  servers           = ["10.0.0.100", "10.0.1.100", "10.0.2.100"]
+  servers           = ["provider=aws tag_key=nomad_client tag_value=true region=us-west-2"]
 
   host_volume "certs" {
     path      = "/data/certs"
     read_only = "true"
-  }
-
-  host_volume "mysql" {
-    path      = "/data/mysql"
-    read_only = "false"
-  }
-
-  host_volume "prometheus" {
-    path      = "/data/prometheus"
-    read_only = "false"
   }
 
   host_volume "templates" {
@@ -137,7 +127,7 @@ sudo chmod a+w /etc/consul.d
 # Consul config file copy
 sudo mkdir -p /tmp/consul
 sudo tee /tmp/consul/server.hcl <<EOF
-data_dir = "/tmp/consul/server"
+data_dir = "/opt/consul/server"
 
 server           = true
 bootstrap_expect = 1
@@ -145,7 +135,7 @@ advertise_addr   = "{{ GetInterfaceIP \"eth0\" }}"
 client_addr      = "0.0.0.0"
 ui               = true
 datacenter       = "dc-aws-1"
-retry_join       = ["10.0.0.100", "10.0.1.100", "10.0.2.100"]
+retry_join       = ["provider=aws tag_key=consul_server tag_value=true region=us-west-2"]
 retry_max        = 10
 retry_interval   = "15s"
 

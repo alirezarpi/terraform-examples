@@ -1,3 +1,11 @@
+variable "aws_access_key" {
+  description = "Access key for AWS account"
+}
+
+variable "aws_secret_key" {
+  description = "Secret for AWS account"
+}
+
 variable "aws_region" {
   description = "The region name to deploy into"
   default     = "us-west-2"
@@ -21,7 +29,7 @@ variable "nomad_node_ami_id" {
 variable "nomad_node_count" {
   description = "The number of server nodes (should be 3 or 5)"
   type        = number
-  default     = 3
+  default     = 5
 }
 
 variable "allowed_ip_network" {
@@ -31,10 +39,11 @@ variable "allowed_ip_network" {
 
 variable "az_map" {
   type = map(any)
-
   default = {
     0 = "a"
     1 = "b"
     2 = "c"
+    3 = "a"
+    4 = "b"
   }
 }
