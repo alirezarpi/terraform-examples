@@ -1,19 +1,11 @@
-output "private_ip_addr" {
-  value = aws_instance.nomad-node[*].private_ip
-}
-
-output "public_ip_addr" {
-  value = aws_instance.nomad-node[*].public_ip
+output "nomad_url" {
+  value = "http://${aws_instance.nomad-node[0].public_ip}:4646/ui/"
 }
 
 output "consul_url" {
-  value = "http://${aws_instance.nomad-node[0].public_ip}:8500/ui"
+  value = "http://${aws_instance.nomad-node[0].public_ip}:8500/ui/"
 }
 
-output "nomad_url" {
-  value = "http://${aws_instance.nomad-node[0].public_ip}:4646/ui"
-}
-
-output "ec2_nodes" {
-  value = aws_instance.nomad-node[*].public_dns
+output "fabio_url" {
+  value = "http://${aws_instance.nomad-node[0].public_ip}:9998/"
 }

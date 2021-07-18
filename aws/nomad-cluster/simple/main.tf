@@ -11,10 +11,6 @@ resource "aws_instance" "nomad-node" {
   user_data                   = file("conf/install-nomad.sh")
   private_ip                  = "10.0.${count.index}.100"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
   tags = {
     Terraform     = "true"
     ProvisionedBy = "Alirezarpi"
