@@ -1,4 +1,4 @@
-job "helloapp" {
+job "test-app" {
 	region = "region-aws-1"
 	datacenters = ["dc-aws-1"]
 	type = "service"
@@ -13,12 +13,15 @@ job "helloapp" {
 		max_parallel = 1
 	}
 
-	group "hello" {
+	group "flask-redis" {
 		count = 10
 
 		network {
 			port "http" {
-				to = 8080
+				to = 5000
+			}
+			port "redis" {
+				to = 6379
 			}
 		}
 
@@ -36,24 +39,24 @@ job "helloapp" {
 			mode = "fail"
 		}
 
-		task "hello" {
+		task "flask-app" {
 			driver = "docker"
 
 			config {
-				image = "gerlacdt/helloapp:v0.1.0"
-				ports = ["http"]
+				image = "alirezarpi/flask-redis-app:latest"
+				ports = ["http", "redis"]
 			}
 
 			service {
 				name = "${TASKGROUP}-service"
-				tags = ["global", "hello", "urlprefix-hello.internal/"]
+				tags = ["global", "flask-app", "urlprefix-/flask-app"]
 				port = "http"
 				check {
-				  name = "alive"
-				  type = "http"
-				  interval = "10s"
-				  timeout = "3s"
-				  path = "/health"
+                    name = "alive"
+                    type = "http"
+                    interval = "10s"
+                    timeout = "3s"
+                    path = "/health"
 				}
 			}
 
