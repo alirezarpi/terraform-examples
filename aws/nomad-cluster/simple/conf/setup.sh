@@ -95,6 +95,7 @@ autopilot {
   enable_custom_upgrades    = false
 }
 EOF
+
 sudo cp /tmp/nomad/server.hcl /etc/nomad.d/server.hcl
 
 CONSUL_VERSION=1.10.0
