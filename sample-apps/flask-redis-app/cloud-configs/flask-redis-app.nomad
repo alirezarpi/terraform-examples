@@ -14,7 +14,7 @@ job "test-app" {
 	}
 
 	group "flask-redis" {
-		count = 10
+		count = 15
 
 		network {
 			port "http" {
@@ -24,9 +24,9 @@ job "test-app" {
 				to = 6379
 			}
 		}
-
+			
 		update {
-			max_parallel     = 2
+			max_parallel     = 1
 			min_healthy_time = "30s"
 			healthy_deadline = "2m"
 		}
@@ -49,7 +49,7 @@ job "test-app" {
 
 			service {
 				name = "${TASKGROUP}-service"
-				tags = ["global", "flask-app", "urlprefix-/flask-app"]
+				tags = ["global", "flask-app", "urlprefix-/"]
 				port = "http"
 				check {
                     name = "alive"
@@ -69,6 +69,7 @@ job "test-app" {
 			    max_files = 10
 			    max_file_size = 15
 			}
+
 			kill_timeout = "10s"
 		}
 	}

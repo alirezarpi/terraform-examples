@@ -23,6 +23,12 @@ job "redis" {
             mode = "delay"
         }
 
+        network {
+            port "db" {
+                to = 6379
+            }
+        }
+
         ephemeral_disk {
             size = 300
         }
@@ -32,18 +38,12 @@ job "redis" {
 
             config {
                 image = "redis:3.2"
-                port_map {
-                    db = 6379
-                }
+                ports = ["db"]
             }
 
             resources {
                 cpu    = 500
                 memory = 256 
-                network {
-                    mbits = 10
-                    port "db" {}
-                }
             }
 
             service {

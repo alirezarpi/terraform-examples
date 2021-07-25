@@ -1,27 +1,17 @@
 #!/bin/bash
-# 
-# user-data script for deploying Nomad on Amazon Linux 2
-# 
-# Using the user-data / cloud init ensures we don't run twice
-#  
 
-# Update system and install dependencies
 sudo yum update -y
 sudo install unzip curl vim jq -y
-# make an archive folder to move old binaries into
 if [ ! -d /tmp/archive ]; then
   sudo mkdir /tmp/archive/
 fi
 
-# Install docker
 sudo amazon-linux-extras install docker -y
 sudo systemctl restart docker
 
-# Set up volumes
-sudo mkdir /data /data/mysql /data/certs /data/prometheus /data/templates
+sudo mkdir /data /data/certs 
 sudo chown root -R /data
 
-# Install Nomad
 NOMAD_VERSION=1.1.2
 sudo curl -sSL https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip -o nomad.zip
 if [ ! -d nomad ]; then
@@ -37,7 +27,6 @@ sudo mv /tmp/nomad /tmp/archive/nomad
 sudo mkdir -p /etc/nomad.d
 sudo chmod a+w /etc/nomad.d
 
-# Nomad config file copy
 sudo mkdir -p /tmp/nomad
 sudo tee /tmp/nomad/server.hcl <<EOF
 data_dir = "/opt/nomad/server"
@@ -108,7 +97,6 @@ autopilot {
 EOF
 sudo cp /tmp/nomad/server.hcl /etc/nomad.d/server.hcl
 
-# Install Consul
 CONSUL_VERSION=1.10.0
 sudo curl -sSL https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip > consul.zip
 if [ ! -d consul ]; then
@@ -124,13 +112,12 @@ sudo mv /tmp/consul /tmp/archive/consul
 sudo mkdir -p /etc/consul.d
 sudo chmod a+w /etc/consul.d
 
-# Consul config file copy
 sudo mkdir -p /tmp/consul
 sudo tee /tmp/consul/server.hcl <<EOF
 data_dir = "/opt/consul/server"
 
 server           = true
-bootstrap_expect = 1
+bootstrap_expect = 5
 advertise_addr   = "{{ GetInterfaceIP \"eth0\" }}"
 client_addr      = "0.0.0.0"
 ui               = true
@@ -145,7 +132,23 @@ acl = {
   enable_token_persistence = true
 }
 EOF
+
+# sudo tee /tmp/consul/client.hcl <<EOF
+# data_dir         = "/opt/consul/client"
+# ui               = true,
+# log_level        = "INFO",
+# data_dir         = "/opt/consul/data",
+# bind_addr        = "0.0.0.0",
+# client_addr      = "0.0.0.0",
+# retry_join       = ["provider=aws tag_key=consul_server tag_value=true region=us-west-2"]
+
+# connect = {
+#   "enabled" = true
+# }
+# EOF
+
 sudo cp /tmp/consul/server.hcl /etc/consul.d/server.hcl
+# sudo cp /tmp/consul/client.hcl /etc/consul.d/client.hcl
 
 for bin in cfssl cfssl-certinfo cfssljson
 do
@@ -163,10 +166,8 @@ if [ $retval -eq 1 ]; then
   nomad -autocomplete-install
 fi
 
-# Install Ansible for config management
 sudo amazon-linux-extras install ansible2 -y
 
-# Form Consul Cluster
 ps -C consul
 retval=$?
 if [ $retval -eq 0 ]; then
@@ -174,17 +175,12 @@ if [ $retval -eq 0 ]; then
 fi
 sudo nohup consul agent --config-file /etc/consul.d/server.hcl >$HOME/consul.log &
 
-# Form Nomad Cluster
 ps -C nomad
 retval=$?
 if [ $retval -eq 0 ]; then
   sudo killall nomad
 fi
 sudo nohup nomad agent -config /etc/nomad.d/server.hcl >$HOME/nomad.log &
-
-# Bootstrap Nomad and Consul ACL environment
-
-# Write anonymous policy file 
 
 sudo tee -a /tmp/anonymous.policy <<EOF
 namespace "*" {
