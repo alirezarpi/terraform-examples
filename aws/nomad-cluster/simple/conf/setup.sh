@@ -33,7 +33,7 @@ data_dir = "/opt/nomad/server"
 
 server {
   enabled          = true
-  bootstrap_expect = 3
+  bootstrap_expect = 5
   job_gc_threshold = "2m"
   server_join {
     retry_join = ["provider=aws tag_key=nomad_server tag_value=true region=us-west-2"]
@@ -64,11 +64,6 @@ client {
 
   host_volume "certs" {
     path      = "/data/certs"
-    read_only = "true"
-  }
-
-  host_volume "templates" {
-    path      = "/data/templates"
     read_only = "true"
   }
 }
