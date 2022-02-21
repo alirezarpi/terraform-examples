@@ -11,6 +11,20 @@ resource "aws_security_group" "nomad-sg" {
   }
 
   ingress {
+    from_port   = 7
+    to_port     = 7
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_ip_network
+  }
+
+  ingress {
+    from_port   = 7
+    to_port     = 7
+    protocol    = "udp"
+    cidr_blocks = var.allowed_ip_network
+  }
+
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"

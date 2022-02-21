@@ -14,7 +14,7 @@ job "test-app" {
 	}
 
 	group "flask-redis" {
-		count = 15
+		count = 5
 
 		network {
 			port "http" {
@@ -49,7 +49,7 @@ job "test-app" {
 
 			service {
 				name = "${TASKGROUP}-service"
-				tags = ["global", "flask-app", "urlprefix-/"]
+				tags = ["global", "flask-app", "urlprefix-/app"]
 				port = "http"
 				check {
                     name = "alive"
